@@ -18,12 +18,19 @@ function obtenerModelo() {
   return carga;
 }
 
-export async function generarEmbedding(texto: string, tipo: "documento" | "consulta"): Promise<number[]> {
-  if (!texto.trim()) throw new Error("El texto para el embedding no puede estar vacío");
+export async function generarEmbedding(
+  texto: string,
+  tipo: "documento" | "consulta",
+): Promise<number[]> {
+  if (!texto.trim())
+    throw new Error("El texto para el embedding no puede estar vacío");
 
   const extractor = await obtenerModelo();
   // E5 usa prefijos distintos para consultas y documentos.
   const prefijo = tipo === "consulta" ? "query" : "passage";
-  const resultado = await extractor(`${prefijo}: ${texto}`, { pooling: "mean", normalize: true });
+  const resultado = await extractor(`${prefijo}: ${texto}`, {
+    pooling: "mean",
+    normalize: true,
+  });
   return Array.from(resultado.data, Number);
 }
