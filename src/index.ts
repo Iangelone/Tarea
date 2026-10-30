@@ -3,6 +3,7 @@ import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { loadEnvFile } from "node:process";
 import { clasificar } from "./clasificador.js";
+import { indexarDocumentos } from "./indexador.js";
 import { abrirBaseDeDatos, guardarTicket, listarTickets } from "./base-de-datos.js";
 
 // El archivo local es opcional: Docker también puede aportar estas variables.
@@ -76,6 +77,15 @@ const servidor = createServer(async (solicitud, respuesta) => {
   }
 });
 
-servidor.listen(3000, () => {
-  console.log("Servidor disponible en http://localhost:3000");
-});
+// El servidor comienza a recibir solicitudes cuando el índice está listo.
+try {
+  console.log("Preparando documentos...");
+  await indexarDocumentos(base, "documentos");
+  servidor.listen(3000, () => {
+    console.log("Servidor disponible en http://localhost:3000");
+  });
+} catch (error) {
+  base.close();
+  console.error("No se pudieron preparar los documentos:", error);
+  process.exitCode = 1;
+}
