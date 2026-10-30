@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@huggingface/transformers": "^4.3.2",
-    "@langchain/textsplitters": "^1.0.2"
+    "@langchain/textsplitters": "^1.0.2",
+    "ai": "^7.0.158",
+    "zod": "^4.6.7"
   }
 }
