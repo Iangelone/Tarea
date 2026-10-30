@@ -52,17 +52,20 @@ export function crearHerramientas(base: DatabaseSync, fuentes: Set<string>) {
       },
     ),
     tool(
-      ({ id }) =>
+      ({ id, limite }) =>
         JSON.stringify(
           id === undefined
-            ? listarTickets(base).slice(0, 20)
+            ? listarTickets(base, limite ?? 5)
             : (obtenerTicket(base, id) ?? { error: "Ticket no encontrado" }),
         ),
       {
         name: "consultar_tickets",
         description:
-          "Consulta un ticket por ID o los 20 más recientes si no se indica uno.",
-        schema: z.object({ id: id.optional() }),
+          "Consulta un ticket por ID o la cantidad solicitada de tickets recientes (5 por defecto, máximo 20).",
+        schema: z.object({
+          id: id.optional(),
+          limite: z.number().int().min(1).max(20).optional(),
+        }),
       },
     ),
     tool(
