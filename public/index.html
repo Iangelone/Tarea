@@ -1,45 +1,80 @@
 <!doctype html>
 <html lang="es">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Soporte</title>
-  <link rel="stylesheet" href="/estilos.css">
-  <script src="/app.js" defer></script>
-</head>
-<body>
-  <header class="cabecera">
-    <nav class="navegacion" aria-label="Secciones">
-      <button type="button" class="pestana activa" data-seccion="chat" aria-pressed="true">Chat</button>
-      <button type="button" class="pestana" data-seccion="tickets" aria-pressed="false">Tickets</button>
-    </nav>
-  </header>
-  <main>
-    <section id="chat" class="seccion chat-vacio" aria-label="Chat sobre documentos">
-      <div id="conversacion" class="conversacion" aria-live="polite"></div>
-      <div id="bienvenida" class="bienvenida">
-        <h1>¿En qué puedo ayudarte?</h1>
-        <p>Consulta los documentos de soporte.</p>
-      </div>
-      <form id="form-chat" class="entrada">
-        <label class="oculto" for="pregunta">Escribe tu pregunta</label>
-        <textarea id="pregunta" placeholder="Escribe tu pregunta" rows="1" required></textarea>
-        <button type="submit">Enviar</button>
-      </form>
-      <p class="nota">Las respuestas se basan en los documentos disponibles.</p>
-    </section>
-    <section id="tickets" class="seccion panel-tickets" aria-label="Tickets de soporte" hidden>
-      <h1>Tickets de soporte</h1>
-      <p class="subtitulo">Describe un reclamo para clasificarlo.</p>
-      <form id="form-ticket" class="entrada entrada-ticket">
-        <label class="oculto" for="reclamo">Describe el reclamo</label>
-        <textarea id="reclamo" placeholder="Escribe un reclamo" rows="3" required></textarea>
-        <button type="submit">Clasificar</button>
-      </form>
-      <p id="estado-ticket" role="status"></p>
-      <h2>Tickets guardados</h2>
-      <div id="lista-tickets" aria-live="polite"></div>
-    </section>
-  </main>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Soporte</title>
+    <link rel="stylesheet" href="/estilos.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <header class="cabecera">
+      <nav class="navegacion" aria-label="Secciones">
+        <button
+          type="button"
+          class="pestana activa"
+          data-seccion="chat"
+          aria-pressed="true"
+        >
+          Chat
+        </button>
+        <button
+          type="button"
+          class="pestana"
+          data-seccion="tickets"
+          aria-pressed="false"
+        >
+          Tickets
+        </button>
+      </nav>
+    </header>
+    <main>
+      <section
+        id="chat"
+        class="seccion chat-vacio"
+        aria-label="Chat sobre documentos"
+      >
+        <div id="conversacion" class="conversacion" aria-live="polite"></div>
+        <div id="bienvenida" class="bienvenida">
+          <h1>¿En qué puedo ayudarte?</h1>
+          <p>Consulta los documentos de soporte.</p>
+        </div>
+        <form id="form-chat" class="entrada">
+          <label class="oculto" for="pregunta">Escribe tu pregunta</label>
+          <textarea
+            id="pregunta"
+            placeholder="Escribe tu pregunta"
+            rows="1"
+            required
+          ></textarea>
+          <button type="submit">Enviar</button>
+        </form>
+        <p class="nota">
+          Las respuestas se basan en los documentos disponibles.
+        </p>
+      </section>
+      <section
+        id="tickets"
+        class="seccion panel-tickets"
+        aria-label="Tickets de soporte"
+        hidden
+      >
+        <h1>Tickets de soporte</h1>
+        <p class="subtitulo">Describe un reclamo para clasificarlo.</p>
+        <form id="form-ticket" class="entrada entrada-ticket">
+          <label class="oculto" for="reclamo">Describe el reclamo</label>
+          <textarea
+            id="reclamo"
+            placeholder="Escribe un reclamo"
+            rows="3"
+            required
+          ></textarea>
+          <button type="submit">Clasificar</button>
+        </form>
+        <p id="estado-ticket" role="status"></p>
+        <h2>Tickets guardados</h2>
+        <div id="lista-tickets" aria-live="polite"></div>
+      </section>
+    </main>
+  </body>
 </html>
