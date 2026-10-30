@@ -2,6 +2,7 @@ import type { Clasificacion } from "./clasificacion.js";
 
 // Simula una clasificación con reglas simples; no utiliza un modelo de IA.
 export function clasificarMock(texto: string): Clasificacion {
+  // Normaliza el texto para reconocer palabras con o sin acentos.
   const reclamo = texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
   let categoria: Clasificacion["categoria"] = "otros";
