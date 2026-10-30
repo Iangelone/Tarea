@@ -2,7 +2,7 @@
 
 ## Idea del proyecto
 
-Construir una aplicación que combine un **clasificador de reclamos o tickets de soporte por prioridad y categoría** con un **chat sobre documentos (RAG) de una empresa ficticia**. 
+Es una demo de un backoffice para un equipo de soporte de una empresa ficticia. Permite registrar reclamos, clasificarlos por categoría y prioridad, y consultar documentación interna mediante un chat (RAG).
 
 ## Stack
 
