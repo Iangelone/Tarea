@@ -12,6 +12,9 @@ export default tseslint.config(
     languageOptions: { globals: globals.node },
   },
   { files: ["public/**/*.js"], languageOptions: { globals: globals.browser } },
-  { files: ["eslint.config.js"], languageOptions: { globals: globals.node } },
+  {
+    files: ["eslint.config.js", "evaluacion/**/*.mjs"],
+    languageOptions: { globals: globals.node },
+  },
   prettier,
 );
