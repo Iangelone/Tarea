@@ -75,6 +75,14 @@ npm run format        # Aplicar Prettier
 
 Las pruebas automatizadas cubren el clasificador mock, SQLite y casos del chat mock. No evalúan la calidad de los modelos reales ni requieren una clave.
 
+Para evaluar los modelos reales con ejemplos ficticios, configurar `OPENROUTER_API_KEY` y ejecutar:
+
+```bash
+npm run eval
+```
+
+La evaluación usa una base SQLite temporal en memoria y realiza llamadas de pago a OpenRouter. Compara categoría y prioridad con etiquetas esperadas, mide si la fuente esperada aparece entre los fragmentos recuperados y muestra las respuestas del chat para revisión manual, incluida una pregunta fuera de los documentos. Es una muestra pequeña, no una medición representativa. No forma parte de `npm test`.
+
 ## Limitaciones y mejoras
 
 - Evaluar la clasificación con un conjunto de reclamos etiquetados y ajustar las prioridades: el modelo anterior clasificó una contraseña olvidada como crítica; Jev requiere su propia evaluación.
