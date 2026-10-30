@@ -1,6 +1,9 @@
 import { createServer } from "node:http";
+import { mkdirSync } from "node:fs";
+import { dirname } from "node:path";
 import { loadEnvFile } from "node:process";
 import { clasificarMock } from "./clasificador-mock.js";
+import { abrirBaseDeDatos, guardarTicket, listarTickets } from "./base-de-datos.js";
 import { categorias, prioridades, type Clasificacion } from "./clasificacion.js";
 
 // El archivo local es opcional: Docker también puede aportar estas variables.
@@ -9,6 +12,10 @@ try {
 } catch (error) {
   if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
 }
+
+const rutaBase = process.env.DATABASE_PATH || "data/tickets.db";
+mkdirSync(dirname(rutaBase), { recursive: true });
+const base = abrirBaseDeDatos(rutaBase);
 
 async function clasificar(texto: string): Promise<Clasificacion> {
   const modo = process.env.AI_MODE || "mock";
@@ -77,6 +84,17 @@ const servidor = createServer(async (solicitud, respuesta) => {
     return;
   }
 
+  if (solicitud.method === "GET" && solicitud.url === "/tickets") {
+    try {
+      respuesta.end(JSON.stringify(listarTickets(base)));
+    } catch (error) {
+      console.error("Error al consultar tickets:", error);
+      respuesta.writeHead(500);
+      respuesta.end(JSON.stringify({ error: "No se pudieron consultar los tickets" }));
+    }
+    return;
+  }
+
   if (solicitud.method !== "POST" || solicitud.url !== "/clasificar") {
     respuesta.writeHead(404);
     respuesta.end(JSON.stringify({ error: "Ruta no encontrada" }));
@@ -101,7 +119,9 @@ const servidor = createServer(async (solicitud, respuesta) => {
       return;
     }
 
-    respuesta.end(JSON.stringify(await clasificar(datos.texto)));
+    const clasificacion = await clasificar(datos.texto);
+    guardarTicket(base, datos.texto, clasificacion);
+    respuesta.end(JSON.stringify(clasificacion));
   } catch (error) {
     if (error instanceof SyntaxError) {
       respuesta.writeHead(400);
