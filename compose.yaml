@@ -7,7 +7,7 @@ services:
       AI_MODE: ${AI_MODE:-mock}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       DECISION_MODEL: ${DECISION_MODEL:-typesafe/jev-1.13}
-      CHAT_MODEL: ${CHAT_MODEL:-deepseek/deepseek-v4.1-flash-1017}
+      CHAT_MODEL: ${CHAT_MODEL:-qwen/qwen3.7-flash}
       DATABASE_PATH: /app/data/tickets.db
     volumes:
       # Conserva los tickets y los embeddings indexados.
