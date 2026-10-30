@@ -27,11 +27,34 @@ async function solicitar(ruta, opciones) {
   return datos;
 }
 
-// Inserta texto sin interpretarlo como HTML.
+// Da formato básico al Markdown sin interpretar HTML recibido del modelo.
+function mostrarRespuesta(elemento, texto) {
+  const lineas = texto.split("\n");
+  for (const [indice, linea] of lineas.entries()) {
+    if (indice) elemento.append(document.createTextNode("\n"));
+    const contenido = linea.replace(/^\s{0,3}#{1,6}\s+/, "");
+    if (/^\s*---+\s*$/.test(contenido)) continue;
+    const partes = contenido.split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/g);
+    for (const parte of partes) {
+      const negrita = parte.startsWith("**") && parte.endsWith("**") && parte.length > 4;
+      const cursiva = !negrita && parte.startsWith("*") && parte.endsWith("*") && parte.length > 2;
+      if (negrita || cursiva) {
+        const formato = document.createElement(negrita ? "strong" : "em");
+        formato.textContent = parte.slice(negrita ? 2 : 1, negrita ? -2 : -1);
+        elemento.append(formato);
+      } else {
+        elemento.append(document.createTextNode(parte));
+      }
+    }
+  }
+}
+
+// Inserta texto sin interpretar HTML arbitrario.
 function agregarMensaje(texto, tipo, fuentes = []) {
   const mensaje = document.createElement("div");
   mensaje.className = `mensaje ${tipo}`;
-  mensaje.textContent = texto;
+  if (tipo === "asistente") mostrarRespuesta(mensaje, texto);
+  else mensaje.textContent = texto;
   if (fuentes.length) {
     const detalle = document.createElement("div");
     detalle.className = "fuentes";
