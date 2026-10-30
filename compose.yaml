@@ -1,0 +1,20 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      AI_MODE: ${AI_MODE:-mock}
+      AI_GATEWAY_API_KEY: ${AI_GATEWAY_API_KEY:-}
+      DECISION_MODEL: ${DECISION_MODEL:-}
+      CHAT_MODEL: ${CHAT_MODEL:-nvidia/nemotron-3.5-lightning-free}
+      DATABASE_PATH: /app/data/tickets.db
+    volumes:
+      # Conserva los tickets y los embeddings indexados.
+      - datos:/app/data
+      # Evita descargar el modelo de embeddings en cada ejecución.
+      - modelos:/app/node_modules/@huggingface/transformers/.cache
+
+volumes:
+  datos:
+  modelos:
