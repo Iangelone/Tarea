@@ -1,4 +1,4 @@
-// Opciones iniciales para clasificar reclamos de soporte.
+// Define las categorías, prioridades y el formato de una clasificación.
 export const categorias = [
   "acceso",
   "facturacion",
