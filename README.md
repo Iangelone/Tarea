@@ -38,7 +38,7 @@ Para usar los modelos reales de OpenRouter, copiar `.env.example` a `.env`, camb
 AI_MODE=gateway
 OPENROUTER_API_KEY=tu_clave
 DECISION_MODEL=typesafe/jev-1.13
-CHAT_MODEL=deepseek/deepseek-v4.1-flash-1017
+CHAT_MODEL=qwen/qwen3.7-flash
 ```
 
 El modelo local de embeddings es `Xenova/multilingual-e5-small` cuantizado en `q8`. Actualmente está definido en el código y no se configura mediante `.env`.
@@ -48,7 +48,7 @@ El modelo local de embeddings es `Xenova/multilingual-e5-small` cuantizado en `q
 - **Backend:** Node.js 24 y TypeScript, con el servidor HTTP nativo para mantener una API pequeña y sin framework adicional.
 - **Clasificación:** en modo gateway, Jev recibe en una llamada las opciones de categoría y prioridad mediante la API de decisiones de OpenRouter. La salida se valida antes de guardar el ticket. En modo mock se aplican reglas locales.
 - **RAG:** LangChain divide los documentos Markdown en fragmentos; Transformers.js genera embeddings localmente. Al iniciar, el indexador usa una huella y una versión para actualizar los documentos nuevos o modificados y retirar los eliminados. Los fragmentos y sus vectores se almacenan en SQLite; la búsqueda ordena los resultados por similitud coseno.
-- **Chat:** LangChain conecta el modelo con herramientas para consultar documentos y crear, consultar, editar o borrar tickets cuando el usuario lo solicita. La respuesta incluye las fuentes consultadas. La interfaz envía los mensajes recientes para dar contexto; el historial no se persiste y se pierde al recargar.
+- **Chat:** LangChain conecta el modelo con herramientas para consultar documentos y crear, consultar, editar o borrar tickets cuando el usuario lo solicita. El agente busca y habilita las herramientas necesarias en cada consulta; esto reduce las definiciones iniciales, pero puede requerir una llamada adicional al modelo. Al listar tickets, solicita la cantidad necesaria (cinco por defecto, hasta veinte). La respuesta incluye las fuentes consultadas. La interfaz envía los mensajes recientes para dar contexto; el historial no se persiste y se pierde al recargar.
 - **Persistencia:** SQLite usa el módulo `node:sqlite`. Compose conserva la base y la caché del modelo en volúmenes separados. La base local y las claves están excluidas de Git.
 - **Interfaz:** HTML, CSS y JavaScript sin framework, servidos por el backend.
 
