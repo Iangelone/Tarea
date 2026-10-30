@@ -1,11 +1,38 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { abrirBaseDeDatos, obtenerTicket } from "../src/base-de-datos.js";
+import {
+  abrirBaseDeDatos,
+  guardarTicket,
+  obtenerTicket,
+} from "../src/base-de-datos.js";
 import { crearHerramientas } from "../src/herramientas.js";
 
 // Cada prueba utiliza una base aislada y el clasificador local.
 afterEach(() => vi.unstubAllEnvs());
 
 describe("herramientas de tickets", () => {
+  it("devuelve la cantidad solicitada de tickets recientes", async () => {
+    const base = abrirBaseDeDatos(":memory:");
+    try {
+      for (let numero = 1; numero <= 7; numero++) {
+        guardarTicket(base, `Reclamo ${numero}`, {
+          categoria: "otros",
+          prioridad: "media",
+        });
+      }
+      const consultar = crearHerramientas(base, new Set()).find(
+        (herramienta) => herramienta.name === "consultar_tickets",
+      )!;
+      expect(JSON.parse(await consultar.invoke({}))).toHaveLength(5);
+      const tickets = JSON.parse(await consultar.invoke({ limite: 2 }));
+      expect(tickets.map((ticket: { texto: string }) => ticket.texto)).toEqual([
+        "Reclamo 7",
+        "Reclamo 6",
+      ]);
+      await expect(consultar.invoke({ limite: 21 })).rejects.toThrow();
+    } finally {
+      base.close();
+    }
+  });
   it("crea, consulta, edita y borra un ticket", async () => {
     vi.stubEnv("AI_MODE", "mock");
     const base = abrirBaseDeDatos(":memory:");
