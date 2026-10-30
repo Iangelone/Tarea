@@ -21,6 +21,7 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid #aaa; outline-
 .nota { color: #777; text-align: center; font-size: 12px; margin: 12px 0 0; }
 .chat-activo { min-height: calc(100vh - 70px); display: flex; flex-direction: column; padding-bottom: 24px; }
 .chat-activo .conversacion { flex: 1; padding: 32px 0; }
+.chat-activo #form-chat { position: sticky; bottom: 12px; z-index: 1; box-shadow: 0 0 0 12px #000; }
 .mensaje { max-width: 85%; margin: 0 0 24px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
 .mensaje.usuario { margin-left: auto; background: #242424; border-radius: 20px; padding: 12px 17px; }
 .fuentes { color: #888; font-size: 12px; margin-top: 8px; }
