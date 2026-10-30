@@ -15,7 +15,8 @@ for (const pestana of pestanas) {
       boton.classList.toggle("activa", activa);
       boton.setAttribute("aria-pressed", String(activa));
     }
-    for (const seccion of secciones) seccion.hidden = seccion.id !== pestana.dataset.seccion;
+    for (const seccion of secciones)
+      seccion.hidden = seccion.id !== pestana.dataset.seccion;
     if (pestana.dataset.seccion === "tickets") cargarTickets();
   });
 }
@@ -23,7 +24,8 @@ for (const pestana of pestanas) {
 async function solicitar(ruta, opciones) {
   const respuesta = await fetch(ruta, opciones);
   const datos = await respuesta.json();
-  if (!respuesta.ok) throw new Error(datos.error || "No se pudo completar la solicitud");
+  if (!respuesta.ok)
+    throw new Error(datos.error || "No se pudo completar la solicitud");
   return datos;
 }
 
@@ -36,8 +38,13 @@ function mostrarRespuesta(elemento, texto) {
     if (/^\s*---+\s*$/.test(contenido)) continue;
     const partes = contenido.split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/g);
     for (const parte of partes) {
-      const negrita = parte.startsWith("**") && parte.endsWith("**") && parte.length > 4;
-      const cursiva = !negrita && parte.startsWith("*") && parte.endsWith("*") && parte.length > 2;
+      const negrita =
+        parte.startsWith("**") && parte.endsWith("**") && parte.length > 4;
+      const cursiva =
+        !negrita &&
+        parte.startsWith("*") &&
+        parte.endsWith("*") &&
+        parte.length > 2;
       if (negrita || cursiva) {
         const formato = document.createElement(negrita ? "strong" : "em");
         formato.textContent = parte.slice(negrita ? 2 : 1, negrita ? -2 : -1);
@@ -64,42 +71,58 @@ function agregarMensaje(texto, tipo, fuentes = []) {
   conversacion.append(mensaje);
 }
 
-document.querySelector("#form-chat").addEventListener("submit", async (evento) => {
-  evento.preventDefault();
-  const pregunta = document.querySelector("#pregunta");
-  const texto = pregunta.value.trim();
-  if (!texto || enviandoChat) return;
-  enviandoChat = true;
-  const boton = evento.currentTarget.querySelector("button");
-  bienvenida.hidden = true;
-  chat.classList.replace("chat-vacio", "chat-activo");
-  agregarMensaje(texto, "usuario");
-  pregunta.value = "";
-  boton.disabled = true;
-  try {
-    // Conserva los mensajes recientes sin superar el límite del servidor.
-    const recientes = historial.slice(-20);
-    while (recientes.length && new TextEncoder().encode(JSON.stringify({ pregunta: texto, historial: recientes })).length > 9500) {
-      recientes.splice(0, 2);
+document
+  .querySelector("#form-chat")
+  .addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const pregunta = document.querySelector("#pregunta");
+    const texto = pregunta.value.trim();
+    if (!texto || enviandoChat) return;
+    enviandoChat = true;
+    const boton = evento.currentTarget.querySelector("button");
+    bienvenida.hidden = true;
+    chat.classList.replace("chat-vacio", "chat-activo");
+    agregarMensaje(texto, "usuario");
+    pregunta.value = "";
+    boton.disabled = true;
+    try {
+      // Conserva los mensajes recientes sin superar el límite del servidor.
+      const recientes = historial.slice(-20);
+      while (
+        recientes.length &&
+        new TextEncoder().encode(
+          JSON.stringify({ pregunta: texto, historial: recientes }),
+        ).length > 9500
+      ) {
+        recientes.splice(0, 2);
+      }
+      const datos = await solicitar("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pregunta: texto, historial: recientes }),
+      });
+      agregarMensaje(datos.respuesta, "asistente", datos.fuentes);
+      historial.push(
+        { role: "user", content: texto },
+        { role: "assistant", content: datos.respuesta },
+      );
+    } catch (error) {
+      agregarMensaje(error.message, "asistente");
+    } finally {
+      enviandoChat = false;
+      boton.disabled = false;
+      pregunta.focus();
+      window.scrollTo(0, document.body.scrollHeight);
     }
-    const datos = await solicitar("/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pregunta: texto, historial: recientes }) });
-    agregarMensaje(datos.respuesta, "asistente", datos.fuentes);
-    historial.push({ role: "user", content: texto }, { role: "assistant", content: datos.respuesta });
-  } catch (error) {
-    agregarMensaje(error.message, "asistente");
-  } finally {
-    enviandoChat = false;
-    boton.disabled = false;
-    pregunta.focus();
-    window.scrollTo(0, document.body.scrollHeight);
-  }
-});
+  });
 
 async function cargarTickets() {
   listaTickets.textContent = "Cargando tickets...";
   try {
     const tickets = await solicitar("/tickets");
-    listaTickets.textContent = tickets.length ? "" : "Todavía no hay tickets guardados.";
+    listaTickets.textContent = tickets.length
+      ? ""
+      : "Todavía no hay tickets guardados.";
     for (const ticket of tickets) {
       const elemento = document.createElement("article");
       elemento.className = "ticket";
@@ -115,23 +138,29 @@ async function cargarTickets() {
   }
 }
 
-document.querySelector("#form-ticket").addEventListener("submit", async (evento) => {
-  evento.preventDefault();
-  const reclamo = document.querySelector("#reclamo");
-  const texto = reclamo.value.trim();
-  if (!texto) return;
-  const boton = evento.currentTarget.querySelector("button");
-  const estado = document.querySelector("#estado-ticket");
-  boton.disabled = true;
-  estado.textContent = "Clasificando...";
-  try {
-    const resultado = await solicitar("/clasificar", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ texto }) });
-    estado.textContent = `Categoría: ${resultado.categoria} · Prioridad: ${resultado.prioridad}`;
-    reclamo.value = "";
-    await cargarTickets();
-  } catch (error) {
-    estado.textContent = error.message;
-  } finally {
-    boton.disabled = false;
-  }
-});
+document
+  .querySelector("#form-ticket")
+  .addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const reclamo = document.querySelector("#reclamo");
+    const texto = reclamo.value.trim();
+    if (!texto) return;
+    const boton = evento.currentTarget.querySelector("button");
+    const estado = document.querySelector("#estado-ticket");
+    boton.disabled = true;
+    estado.textContent = "Clasificando...";
+    try {
+      const resultado = await solicitar("/clasificar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ texto }),
+      });
+      estado.textContent = `Categoría: ${resultado.categoria} · Prioridad: ${resultado.prioridad}`;
+      reclamo.value = "";
+      await cargarTickets();
+    } catch (error) {
+      estado.textContent = error.message;
+    } finally {
+      boton.disabled = false;
+    }
+  });
