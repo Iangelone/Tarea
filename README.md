@@ -32,13 +32,13 @@ Después de modificar código o documentos, reconstruir la imagen con `docker co
 
 ## Configuración de modelos
 
-Para utilizar Vercel AI Gateway, crear un archivo `.env` en la raíz con los siguientes valores:
+Para usar los modelos reales de OpenRouter, copiar `.env.example` a `.env`, cambiar `AI_MODE` a `gateway` y colocar la clave de OpenRouter:
 
 ```dotenv
 AI_MODE=gateway
-AI_GATEWAY_API_KEY=tu_clave
-DECISION_MODEL=convaiinnovations/laya-free
-CHAT_MODEL=nvidia/nemotron-3.5-lightning-free
+OPENROUTER_API_KEY=tu_clave
+DECISION_MODEL=typesafe/jev-1.13
+CHAT_MODEL=deepseek/deepseek-v4.1-flash-1017
 ```
 
 El modelo local de embeddings es `Xenova/multilingual-e5-small` cuantizado en `q8`. Actualmente está definido en el código y no se configura mediante `.env`.
@@ -46,7 +46,7 @@ El modelo local de embeddings es `Xenova/multilingual-e5-small` cuantizado en `q
 ## Diseño técnico
 
 - **Backend:** Node.js 24 y TypeScript, con el servidor HTTP nativo para mantener una API pequeña y sin framework adicional.
-- **Clasificación:** en modo gateway, Laya recibe en una llamada las opciones de categoría y prioridad mediante la API de decisiones de Vercel. La salida se valida antes de guardar el ticket. En modo mock se aplican reglas locales.
+- **Clasificación:** en modo gateway, Jev recibe en una llamada las opciones de categoría y prioridad mediante la API de decisiones de OpenRouter. La salida se valida antes de guardar el ticket. En modo mock se aplican reglas locales.
 - **RAG:** LangChain divide los documentos Markdown en fragmentos; Transformers.js genera embeddings localmente. Al iniciar, el indexador usa una huella y una versión para actualizar los documentos nuevos o modificados y retirar los eliminados. Los fragmentos y sus vectores se almacenan en SQLite; la búsqueda ordena los resultados por similitud coseno.
 - **Chat:** LangChain conecta el modelo con herramientas para consultar documentos y crear, consultar, editar o borrar tickets cuando el usuario lo solicita. La respuesta incluye las fuentes consultadas. La interfaz envía los mensajes recientes para dar contexto; el historial no se persiste y se pierde al recargar.
 - **Persistencia:** SQLite usa el módulo `node:sqlite`. Compose conserva la base y la caché del modelo en volúmenes separados. La base local y las claves están excluidas de Git.
@@ -77,7 +77,7 @@ Las pruebas automatizadas cubren el clasificador mock, SQLite y casos del chat m
 
 ## Limitaciones y mejoras
 
-- Evaluar la clasificación con un conjunto de reclamos etiquetados y ajustar las prioridades: en una prueba, una contraseña olvidada se clasificó como crítica.
+- Evaluar la clasificación con un conjunto de reclamos etiquetados y ajustar las prioridades: el modelo anterior clasificó una contraseña olvidada como crítica; Jev requiere su propia evaluación.
 - Evaluar la recuperación y las respuestas fuera de los documentos; la similitud siempre ordena fragmentos y no garantiza que sean pertinentes. Las fuentes mostradas son las consultadas, no citas verificadas.
 - Mejorar el manejo de errores y límites de uso del proveedor; una pregunta con herramientas puede requerir varias llamadas al modelo.
 - Ampliar las pruebas de integración y de interfaz, incluyendo el comportamiento del chat con herramientas y el modelo real.
