@@ -34,14 +34,14 @@ export async function responderChat(
     };
   }
   if (modo !== "gateway") throw new Error("AI_MODE debe ser mock o gateway");
-  if (!process.env.AI_GATEWAY_API_KEY)
-    throw new Error("Falta AI_GATEWAY_API_KEY");
+  if (!process.env.OPENROUTER_API_KEY)
+    throw new Error("Falta OPENROUTER_API_KEY");
 
   const fuentes = new Set<string>();
   const modelo = new ChatOpenAI({
-    apiKey: process.env.AI_GATEWAY_API_KEY,
-    model: process.env.CHAT_MODEL || "nvidia/nemotron-3.5-lightning-free",
-    configuration: { baseURL: "https://ai-gateway.vercel.sh/v1" },
+    apiKey: process.env.OPENROUTER_API_KEY,
+    model: process.env.CHAT_MODEL || "deepseek/deepseek-v4.1-flash-1017",
+    configuration: { baseURL: "https://openrouter.ai/api/v1" },
     maxRetries: 0,
     timeout: 60_000,
   });
