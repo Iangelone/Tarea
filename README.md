@@ -1,6 +1,6 @@
 # Demo: clasificación de tickets y chat sobre documentos
 
-Aplicación de demostración para una empresa ficticia. Permite registrar reclamos, clasificarlos por categoría y prioridad, y consultar documentos de soporte mediante un chat con recuperación de información (RAG).
+Es una demo de un backoffice para un equipo de soporte de una empresa ficticia. Permite registrar reclamos, clasificarlos por categoría y prioridad, y consultar documentación interna mediante un chat con recuperación de información (RAG).
 
 La interfaz permite enviar reclamos, consultar los tickets guardados y conversar con el asistente. En modo gateway, el asistente también puede crear, consultar, editar y borrar tickets por solicitud del usuario. Los documentos incluidos cubren acceso, facturación, seguridad y soporte técnico. Es una **demo**, no una aplicación preparada para producción.
 
