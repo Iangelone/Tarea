@@ -21,7 +21,7 @@ afterEach(() => {
 });
 
 describe("chat con OpenRouter", () => {
-  it("configura DeepSeek y conserva el historial", async () => {
+  it("configura Qwen y conserva el historial", async () => {
     vi.stubEnv("AI_MODE", "gateway");
     vi.stubEnv("OPENROUTER_API_KEY", "clave-de-prueba");
     vi.stubEnv("CHAT_MODEL", "");
@@ -38,7 +38,7 @@ describe("chat con OpenRouter", () => {
       expect(llamadas.modelo).toHaveBeenCalledWith(
         expect.objectContaining({
           apiKey: "clave-de-prueba",
-          model: "deepseek/deepseek-v4.1-flash-1017",
+          model: "qwen/qwen3.7-flash",
           configuration: { baseURL: "https://openrouter.ai/api/v1" },
         }),
       );
