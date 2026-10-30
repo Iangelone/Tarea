@@ -66,16 +66,17 @@ export function guardarTicket(
 }
 
 // Devuelve primero los tickets más recientes.
-export function listarTickets(base: DatabaseSync): Ticket[] {
+export function listarTickets(base: DatabaseSync, limite = -1): Ticket[] {
   const filas = base
     .prepare(
       `
     SELECT id, texto, categoria, prioridad, creado_en AS creadoEn
     FROM tickets
     ORDER BY id DESC
+    LIMIT ?
   `,
     )
-    .all();
+    .all(limite);
 
   return filas as Ticket[];
 }
