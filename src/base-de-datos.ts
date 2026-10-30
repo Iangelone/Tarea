@@ -7,6 +7,7 @@ export type Ticket = Clasificacion & {
   creadoEn: string;
 };
 
+// Abre SQLite y prepara la tabla donde se guardan los tickets.
 export function abrirBaseDeDatos(ruta: string): DatabaseSync {
   const base = new DatabaseSync(ruta);
 
@@ -37,6 +38,7 @@ export function guardarTicket(
   return Number(resultado.lastInsertRowid);
 }
 
+// Devuelve primero los tickets más recientes.
 export function listarTickets(base: DatabaseSync): Ticket[] {
   const filas = base.prepare(`
     SELECT id, texto, categoria, prioridad, creado_en AS creadoEn
