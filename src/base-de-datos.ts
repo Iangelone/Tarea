@@ -25,6 +25,12 @@ export function abrirBaseDeDatos(ruta: string): DatabaseSync {
       creado_en TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS documentos_indexados (
+      fuente TEXT PRIMARY KEY,
+      huella TEXT NOT NULL,
+      version TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS fragmentos (
       id INTEGER PRIMARY KEY,
       fuente TEXT NOT NULL,
@@ -76,6 +82,7 @@ export function guardarFragmentos(base: DatabaseSync, fragmentos: FragmentoConEm
   base.exec("BEGIN");
   try {
     base.exec("DELETE FROM fragmentos");
+    base.exec("DELETE FROM documentos_indexados");
     for (const fragmento of fragmentos) {
       insertar.run(fragmento.fuente, fragmento.contenido, JSON.stringify(fragmento.embedding));
     }
@@ -100,4 +107,62 @@ export function listarFragmentos(base: DatabaseSync): FragmentoConEmbedding[] {
     }
     return { fuente: fila.fuente, contenido: fila.contenido, embedding };
   });
+}
+
+export type DocumentoIndexado = {
+  fuente: string;
+  huella: string;
+  version: string;
+};
+
+// La versión permite regenerar los vectores si cambia el modelo o la división.
+export function listarDocumentosIndexados(base: DatabaseSync): DocumentoIndexado[] {
+  return base.prepare("SELECT fuente, huella, version FROM documentos_indexados ORDER BY fuente").all() as DocumentoIndexado[];
+}
+
+// Actualiza un documento completo sin alterar el índice anterior si ocurre un error.
+export function guardarDocumentoIndexado(
+  base: DatabaseSync,
+  documento: DocumentoIndexado,
+  fragmentos: FragmentoConEmbedding[],
+): void {
+  if (!documento.fuente.trim() || !documento.huella.trim() || !documento.version.trim() ||
+      fragmentos.some((fragmento) => fragmento.fuente !== documento.fuente ||
+        !fragmento.contenido.trim() || fragmento.embedding.length !== 384 ||
+        !fragmento.embedding.every(Number.isFinite))) {
+    throw new Error("El documento o sus fragmentos no son válidos");
+  }
+
+  const eliminar = base.prepare("DELETE FROM fragmentos WHERE fuente = ?");
+  const insertar = base.prepare("INSERT INTO fragmentos (fuente, contenido, embedding) VALUES (?, ?, ?)");
+  const guardar = base.prepare(`
+    INSERT INTO documentos_indexados (fuente, huella, version) VALUES (?, ?, ?)
+    ON CONFLICT(fuente) DO UPDATE SET huella = excluded.huella, version = excluded.version
+  `);
+
+  base.exec("BEGIN");
+  try {
+    eliminar.run(documento.fuente);
+    for (const fragmento of fragmentos) {
+      insertar.run(fragmento.fuente, fragmento.contenido, JSON.stringify(fragmento.embedding));
+    }
+    guardar.run(documento.fuente, documento.huella, documento.version);
+    base.exec("COMMIT");
+  } catch (error) {
+    base.exec("ROLLBACK");
+    throw error;
+  }
+}
+
+// Elimina el índice de un archivo que ya no está disponible.
+export function eliminarDocumentoIndexado(base: DatabaseSync, fuente: string): void {
+  base.exec("BEGIN");
+  try {
+    base.prepare("DELETE FROM fragmentos WHERE fuente = ?").run(fuente);
+    base.prepare("DELETE FROM documentos_indexados WHERE fuente = ?").run(fuente);
+    base.exec("COMMIT");
+  } catch (error) {
+    base.exec("ROLLBACK");
+    throw error;
+  }
 }
