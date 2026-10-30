@@ -19,11 +19,13 @@ export async function leerDocumentos(directorio: string): Promise<Fragmento[]> {
     chunkOverlap: 50,
   });
 
-  const documentos = await Promise.all(archivos.map(async (archivo) => {
-    const contenido = await readFile(join(directorio, archivo), "utf8");
-    const partes = await divisor.splitText(contenido);
-    return partes.map((parte) => ({ contenido: parte, fuente: archivo }));
-  }));
+  const documentos = await Promise.all(
+    archivos.map(async (archivo) => {
+      const contenido = await readFile(join(directorio, archivo), "utf8");
+      const partes = await divisor.splitText(contenido);
+      return partes.map((parte) => ({ contenido: parte, fuente: archivo }));
+    }),
+  );
 
   return documentos.flat();
 }
