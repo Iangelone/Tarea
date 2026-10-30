@@ -6,7 +6,11 @@ import { loadEnvFile } from "node:process";
 import { clasificar } from "./clasificador.js";
 import { responderChat, type MensajeChat } from "./chat.js";
 import { indexarDocumentos } from "./indexador.js";
-import { abrirBaseDeDatos, guardarTicket, listarTickets } from "./base-de-datos.js";
+import {
+  abrirBaseDeDatos,
+  guardarTicket,
+  listarTickets,
+} from "./base-de-datos.js";
 
 // El archivo local es opcional: Docker también puede aportar estas variables.
 try {
@@ -49,13 +53,18 @@ const servidor = createServer(async (solicitud, respuesta) => {
     } catch (error) {
       console.error("Error al consultar tickets:", error);
       respuesta.writeHead(500);
-      respuesta.end(JSON.stringify({ error: "No se pudieron consultar los tickets" }));
+      respuesta.end(
+        JSON.stringify({ error: "No se pudieron consultar los tickets" }),
+      );
     }
     return;
   }
 
   const esChat = solicitud.url === "/chat";
-  if (solicitud.method !== "POST" || (solicitud.url !== "/clasificar" && !esChat)) {
+  if (
+    solicitud.method !== "POST" ||
+    (solicitud.url !== "/clasificar" && !esChat)
+  ) {
     respuesta.writeHead(404);
     respuesta.end(JSON.stringify({ error: "Ruta no encontrada" }));
     return;
@@ -68,7 +77,13 @@ const servidor = createServer(async (solicitud, respuesta) => {
       cuerpo += fragmento;
       if (Buffer.byteLength(cuerpo) > 10_000) {
         respuesta.writeHead(413);
-        respuesta.end(JSON.stringify({ error: esChat ? "La pregunta es demasiado larga" : "El reclamo es demasiado largo" }));
+        respuesta.end(
+          JSON.stringify({
+            error: esChat
+              ? "La pregunta es demasiado larga"
+              : "El reclamo es demasiado largo",
+          }),
+        );
         return;
       }
     }
@@ -79,30 +94,59 @@ const servidor = createServer(async (solicitud, respuesta) => {
     } catch (error) {
       if (!(error instanceof SyntaxError)) throw error;
       respuesta.writeHead(400);
-      respuesta.end(JSON.stringify({ error: "El cuerpo debe ser JSON válido" }));
+      respuesta.end(
+        JSON.stringify({ error: "El cuerpo debe ser JSON válido" }),
+      );
       return;
     }
     if (esChat) {
-      if (typeof datos !== "object" || datos === null || !("pregunta" in datos) || typeof datos.pregunta !== "string" || !datos.pregunta.trim()) {
+      if (
+        typeof datos !== "object" ||
+        datos === null ||
+        !("pregunta" in datos) ||
+        typeof datos.pregunta !== "string" ||
+        !datos.pregunta.trim()
+      ) {
         respuesta.writeHead(400);
         respuesta.end(JSON.stringify({ error: "Ingresá una pregunta" }));
         return;
       }
       const historial = "historial" in datos ? datos.historial : [];
-      if (!Array.isArray(historial) || historial.length > 20 || historial.some((mensaje: unknown) =>
-        typeof mensaje !== "object" || mensaje === null || !("role" in mensaje) ||
-        (mensaje.role !== "user" && mensaje.role !== "assistant") || !("content" in mensaje) ||
-        typeof mensaje.content !== "string" || !mensaje.content.trim())) {
+      if (
+        !Array.isArray(historial) ||
+        historial.length > 20 ||
+        historial.some(
+          (mensaje: unknown) =>
+            typeof mensaje !== "object" ||
+            mensaje === null ||
+            !("role" in mensaje) ||
+            (mensaje.role !== "user" && mensaje.role !== "assistant") ||
+            !("content" in mensaje) ||
+            typeof mensaje.content !== "string" ||
+            !mensaje.content.trim(),
+        )
+      ) {
         respuesta.writeHead(400);
         respuesta.end(JSON.stringify({ error: "El historial no es válido" }));
         return;
       }
       // Solo se aceptan mensajes de usuario y asistente enviados por la interfaz.
-      const mensajes: MensajeChat[] = historial.map(({ role, content }) => ({ role, content }));
-      respuesta.end(JSON.stringify(await responderChat(base, datos.pregunta, mensajes)));
+      const mensajes: MensajeChat[] = historial.map(({ role, content }) => ({
+        role,
+        content,
+      }));
+      respuesta.end(
+        JSON.stringify(await responderChat(base, datos.pregunta, mensajes)),
+      );
       return;
     }
-    if (typeof datos !== "object" || datos === null || !("texto" in datos) || typeof datos.texto !== "string" || !datos.texto.trim()) {
+    if (
+      typeof datos !== "object" ||
+      datos === null ||
+      !("texto" in datos) ||
+      typeof datos.texto !== "string" ||
+      !datos.texto.trim()
+    ) {
       respuesta.writeHead(400);
       respuesta.end(JSON.stringify({ error: "Ingresá un texto de reclamo" }));
       return;
@@ -114,7 +158,13 @@ const servidor = createServer(async (solicitud, respuesta) => {
   } catch (error) {
     console.error("Error al procesar la solicitud:", error);
     respuesta.writeHead(500);
-    respuesta.end(JSON.stringify({ error: esChat ? "No se pudo procesar la pregunta" : "No se pudo procesar el reclamo" }));
+    respuesta.end(
+      JSON.stringify({
+        error: esChat
+          ? "No se pudo procesar la pregunta"
+          : "No se pudo procesar el reclamo",
+      }),
+    );
   }
 });
 
