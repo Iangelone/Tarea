@@ -7,7 +7,10 @@ export default tseslint.config(
   { ignores: ["dist/**", "node_modules/**", "data/**"] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
-  { files: ["src/**/*.ts"], languageOptions: { globals: globals.node } },
+  {
+    files: ["src/**/*.ts", "tests/**/*.ts"],
+    languageOptions: { globals: globals.node },
+  },
   { files: ["public/**/*.js"], languageOptions: { globals: globals.browser } },
   { files: ["eslint.config.js"], languageOptions: { globals: globals.node } },
   prettier,
