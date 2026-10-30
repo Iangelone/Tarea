@@ -80,6 +80,45 @@ export function listarTickets(base: DatabaseSync): Ticket[] {
   return filas as Ticket[];
 }
 
+// Consulta y modifica tickets por identificador usando parámetros SQL.
+export function obtenerTicket(
+  base: DatabaseSync,
+  id: number,
+): Ticket | undefined {
+  return base
+    .prepare(
+      `SELECT id, texto, categoria, prioridad, creado_en AS creadoEn
+    FROM tickets WHERE id = ?`,
+    )
+    .get(id) as Ticket | undefined;
+}
+
+export function actualizarTicket(
+  base: DatabaseSync,
+  id: number,
+  cambios: Partial<Pick<Ticket, "texto" | "categoria" | "prioridad">>,
+): Ticket | undefined {
+  const anterior = obtenerTicket(base, id);
+  if (!anterior) return undefined;
+  base
+    .prepare(
+      "UPDATE tickets SET texto = ?, categoria = ?, prioridad = ? WHERE id = ?",
+    )
+    .run(
+      cambios.texto ?? anterior.texto,
+      cambios.categoria ?? anterior.categoria,
+      cambios.prioridad ?? anterior.prioridad,
+      id,
+    );
+  return obtenerTicket(base, id);
+}
+
+export function eliminarTicket(base: DatabaseSync, id: number): boolean {
+  return (
+    Number(base.prepare("DELETE FROM tickets WHERE id = ?").run(id).changes) > 0
+  );
+}
+
 // Sustituye el índice completo en una transacción para evitar datos parciales.
 export function guardarFragmentos(
   base: DatabaseSync,
